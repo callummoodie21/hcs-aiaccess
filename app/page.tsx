@@ -81,6 +81,22 @@ export default function Home() {
               </div>
             </Link>
           </div>
+          <div className="mt-12 text-center">
+            <p className="text-blue-100 text-lg mb-4">
+              Don’t have an account?
+            </p>
+
+            <Link
+              href="/sign_up"
+              className="inline-block px-8 py-3 text-lg font-semibold
+               text-white border-2 border-white rounded-lg
+               hover:bg-white hover:text-blue-900
+               transition-all duration-200 ease-in-out"
+            >
+              Register
+            </Link>
+          </div>
+
         </div>
       </main>
     </div>

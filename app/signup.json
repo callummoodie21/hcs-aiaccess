@@ -1,0 +1,14 @@
+{
+  "firstName": "John",
+  "surname": "Wick",
+  "email": "johnwick123@gmail.com",
+  "password": "Password123#",
+  "confirmPassword": "Password123#",
+  "animal": "Dog",
+  "humour": "None",
+  "annoyance": "Being chased",
+  "explanation": "Peace",
+  "sentence": "Running",
+  "consent": true,
+  "createdAt": "2026-01-28T17:25:50.524Z"
+}
