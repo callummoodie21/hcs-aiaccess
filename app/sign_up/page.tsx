@@ -66,8 +66,8 @@ export default function SignUp() {
       case "animal":
       case "humour":
       case "annoyance":
-      case "explanation":
-      case "sentence":
+      case "dream":
+      case "exercise":
         if (typeof value === "string" && value.trim().length < 2) {
           error = "Please provide at least 2 characters";
         }
