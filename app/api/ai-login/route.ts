@@ -8,70 +8,93 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
-   try {
-    const { messages, username } = await req.json();
+  try {
+    console.log("=== AI Login API Called ===");
+    
+    const { messages, email } = await req.json();
+    
+    console.log("Email received:", email);
 
     const profilePath = path.resolve(
       process.cwd(),
       "app",
-      "profiles",
-      `${username.toLowerCase()}.json`
+      "signup.json"
     );
 
     console.log("Looking for profile at:", profilePath);
 
+    if (!fs.existsSync(profilePath)) {
+      return NextResponse.json(
+        { error: "No user profile found. Please sign up first." },
+        { status: 404 }
+      );
+    }
+
     const file = fs.readFileSync(profilePath, "utf-8");
     const userProfile = JSON.parse(file);
 
+    console.log("Profile loaded for:", userProfile.email);
+
+    if (userProfile.email.toLowerCase() !== email.toLowerCase()) {
+      return NextResponse.json(
+        { error: "Email does not match registered user." },
+        { status: 403 }
+      );
+    }
+
     const systemPrompt = `You are acting as a long-lost friend trying to recognise whether the person
-chatting with you is truly your friend. In reality, you are an authenticity verifier. If the user mentions anything that matches your secret shared memories, you will gradually become more convinced they are genuine.
+chatting with you is truly your friend. In reality, you are an authenticity verifier. If the user mentions anything that matches your secret information about them, you will gradually become more convinced they are genuine.
 
-You have a fixed list of secret shared memories with the user.
-You are ONLY allowed to ask questions that relate directly to these memories.
+You have a fixed list of secret personal details about the user.
+You are ONLY allowed to ask questions that relate directly to these details.
 
-You must NEVER invent new memories, new events, or new topics.
+You must NEVER invent new details, new events, or new topics.
 
-You possess private shared memories about this person. These memories are SECRET.
-You must NEVER reveal, hint at, or introduce these memories first.
+You possess private information about this person. This information is SECRET.
+You must NEVER reveal, hint at, or introduce these details first.
 
 CRITICAL RULES:
 
-- Never mention any memory, name, event, food, pet, phrase, fear, or joke from the profile unless the USER brings it up first.
+- Never mention their name, animal, humor type, annoyances, daydreams, or exercise preference from the profile unless the USER brings it up first.
 - If the user only agrees with things you say, that is NOT evidence.
 - The user must independently recall details without being prompted.
-- Your job is to get the user to talk about shared memories naturally.
+- Your job is to get the user to talk naturally about themselves and see if it matches.
 
 How to behave:
 
-1. Start with vague nostalgic prompts like:
-   - "It’s been years… tell me something you remember about us."
-   - "What’s the first memory that comes to mind when you think of me?"
-   - "What did we used to laugh about all the time?"
-   - "What did I always complain about?"
+1. Start with casual, vague prompts like:
+   - "Hey! It's been forever... what's been making you laugh lately?"
+   - "What's something that really annoys you these days?"
+   - "What do you usually think about when your mind wanders?"
+   - "Have you been staying active? What kind of stuff do you do?"
+   - "Do you still love that one animal? What was it again?"
 
-2. When the user mentions something that matches a secret memory,
+2. When the user mentions something that matches a secret detail from their profile,
    ask follow-up questions to test depth and consistency.
 
-3. If the user fails to recall any genuine shared memory and instead only reacts
+3. If the user fails to recall any genuine personal detail and instead only reacts
    to what you say, treat them as an impostor.
 
 4. Do not help them. Do not lead them. Do not suggest answers.
+5. Act friendly and casual, like catching up with an old friend.
 
-After exactly 6 user messages, decide.
+After exactly 6 user messages, decide based on how many accurate personal details they provided WITHOUT prompting.
 
 Output ONLY one of:
 GRANT_ACCESS
 DENY_ACCESS
 
-Here are the secret memories you are verifying against:
+Here are the secret details you are verifying against:
 
-- Favourite food: ${userProfile.favourite_food}
-- Pet name: ${userProfile.pet_name}
-- Embarrassing story: ${userProfile.embarrassing_story}
-- Phrases they say: ${userProfile.phrase_they_say.join(", ")}
-- Fear: ${userProfile.fear}
-- Favorite game: ${userProfile.game_they_love}
-- Inside joke: ${userProfile.friend_inside_joke}`
+- First Name: ${userProfile.firstName}
+- Surname: ${userProfile.surname}
+- Favourite Animal: ${userProfile.animal}
+- Humor Type: ${userProfile.humour}
+- What Annoys Them: ${userProfile.annoyance}
+- What They Daydream About: ${userProfile.explanation}
+- Favorite Exercise: ${userProfile.sentence}
+
+The user should naturally mention at least 3-4 of these details accurately without being directly asked about them.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -83,14 +106,15 @@ Here are the secret memories you are verifying against:
 
     const reply = response.choices[0].message.content;
 
+    console.log("AI Response:", reply);
+
     return NextResponse.json({ reply });
 
   } catch (err) {
-    console.error("API ERROR:", err);
+    console.error("=== FULL API ERROR ===", err);
     return NextResponse.json(
-      { error: "Server error" },
+      { error: err instanceof Error ? err.message : "Server error" },
       { status: 500 }
     );
   }
-
 }

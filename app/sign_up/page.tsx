@@ -15,8 +15,8 @@ export default function SignUp() {
     animal: "",
     humour: "",
     annoyance: "",
-    explanation: "",
-    sentence: "",
+    dream: "",
+    exercise: "",
     consent: false,
   });
 
@@ -293,8 +293,8 @@ export default function SignUp() {
                 <input
                   type="text"
                   placeholder="What do you daydream about?"
-                  value={form.explanation}
-                  onChange={(e) => handleChange("explanation", e.target.value)}
+                  value={form.dream}
+                  onChange={(e) => handleChange("dream", e.target.value)}
                   onBlur={(e) => handleBlur("explanation", e.target.value)}
                   className={`w-full border rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 placeholder:text-gray-500 ${
                     errors.explanation ? "border-red-500 focus:ring-red-600" : "border-gray-300 focus:ring-blue-600"
@@ -307,8 +307,8 @@ export default function SignUp() {
                 <input
                   type="text"
                   placeholder="Do you have a favourite type of exercise?"
-                  value={form.sentence}
-                  onChange={(e) => handleChange("sentence", e.target.value)}
+                  value={form.exercise}
+                  onChange={(e) => handleChange("exercise", e.target.value)}
                   onBlur={(e) => handleBlur("sentence", e.target.value)}
                   className={`w-full border rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 placeholder:text-gray-500 ${
                     errors.sentence ? "border-red-500 focus:ring-red-600" : "border-gray-300 focus:ring-blue-600"
