@@ -1,14 +1,14 @@
 {
-  "firstName": "John",
-  "surname": "Wick",
-  "email": "johnwick123@gmail.com",
-  "password": "Password123#",
-  "confirmPassword": "Password123#",
-  "animal": "Dog",
-  "humour": "None",
-  "annoyance": "Being chased",
-  "explanation": "Peace",
-  "sentence": "Running",
+  "firstName": "Joe",
+  "surname": "Smith",
+  "email": "email@gmail.com",
+  "password": "Password123",
+  "confirmPassword": "Password123",
+  "animal": "Hyena",
+  "humour": "Sarcastic",
+  "annoyance": "Slow drivers",
+  "dream": "Toyota GT86",
+  "exercise": "Swimming",
   "consent": true,
-  "createdAt": "2026-01-28T17:25:50.524Z"
+  "createdAt": "2026-02-02T14:17:09.722Z"
 }

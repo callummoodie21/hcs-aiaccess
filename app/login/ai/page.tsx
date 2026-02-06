@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -8,22 +9,22 @@ type Message = {
 };
 
 export default function AILogin() {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [loginStarted, setLoginStarted] = useState(false);
 
   const startLogin = () => {
-    if (!username.trim()) {
-      alert('Please enter a username first!');
+    if (!email.trim()) {
+      alert('Please enter your email first!');
       return;
     }
     setLoginStarted(true);
     const welcomeMsg: Message = {
       role: 'assistant',
-      content: `Hey there! I'm here to verify your identity. Instead of a boring password, let's have a chat. So you're claiming to be ${username}? Let me ask you a few things to make sure it's really you...`
+      content: `Hey! Long time no see! I want to make sure it's really you. Let's catch up a bit - what's been going on with you lately?`
     };
     setMessages([welcomeMsg]);
   };
@@ -38,62 +39,44 @@ export default function AILogin() {
     setInput('');
     setLoading(true);
 
-    const res = await fetch("/api/ai-login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: newMessages,
-        username,
-      }),
-    });
+    try {
+      const res = await fetch("/api/ai-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: newMessages,
+          email,
+        }),
+      });
 
-    const data = await res.json();
-    const aiResponse: string = data.reply;
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Authentication failed');
+      }
 
-    // Check for authentication result
-    if (aiResponse.includes('GRANT_ACCESS')) {
-      setAuthenticated(true);
+      const data = await res.json();
+      const aiResponse: string = data.reply;
+      
+      if (aiResponse.includes('GRANT_ACCESS')) {
+        router.push('/success');
+      } else if (aiResponse.includes('DENY_ACCESS')) {
+        setMessages([...newMessages, {
+          role: 'assistant',
+          content: "Hmm... I'm not convinced you are who you say you are. Something doesn't add up. Access denied. ❌"
+        }]);
+      } else {
+        setMessages([...newMessages, { role: 'assistant', content: aiResponse }]);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
       setMessages([...newMessages, {
         role: 'assistant',
-        content: "Welcome back! I remember you now. Access granted! 🎉"
+        content: error instanceof Error ? error.message : "Sorry, something went wrong. Please try again."
       }]);
-    } else if (aiResponse.includes('DENY_ACCESS')) {
-      setMessages([...newMessages, {
-        role: 'assistant',
-        content: "Sorry, I'm not convinced you are who you claim to be. Access denied. ❌"
-      }]);
-    } else {
-      setMessages([...newMessages, { role: 'assistant', content: aiResponse }]);
     }
 
     setLoading(false);
   };
-
-  if (authenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-600 to-green-900 flex items-center justify-center px-4">
-        <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-2xl text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {username}!</h2>
-          <p className="text-gray-600 text-lg mb-6">You have been successfully authenticated.</p>
-          <button
-            onClick={() => {
-              setAuthenticated(false);
-              setMessages([]);
-              setLoginStarted(false);
-            }}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-900 flex flex-col">
@@ -106,20 +89,20 @@ export default function AILogin() {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">AI Login</h2>
-            <p className="text-gray-600 text-lg">Prove you are who you say you are</p>
+            <p className="text-gray-600 text-lg">Let's chat to verify it's really you</p>
           </div>
 
           {!loginStarted ? (
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Username
+                  Email Address
                 </label>
                 <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter username..."
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email..."
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900"
                 />
               </div>
@@ -127,8 +110,16 @@ export default function AILogin() {
                 onClick={startLogin}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                Start Conversation
+                Start Authentication Chat
               </button>
+              <div className="text-center">
+                <p className="text-sm text-gray-600">
+                  Don't have an account?{" "}
+                  <a href="/sign_up" className="text-blue-600 hover:text-blue-700 font-medium">
+                    Sign up here
+                  </a>
+                </p>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -162,24 +153,23 @@ export default function AILogin() {
                 )}
               </div>
 
-              <div className="flex gap-2">
+              <form onSubmit={sendMessage} className="flex gap-2">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && sendMessage(e)}
                   placeholder="Type your message..."
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900"
                   disabled={loading}
                 />
                 <button
-                  onClick={sendMessage}
-                  disabled={loading}
+                  type="submit"
+                  disabled={loading || !input.trim()}
                   className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-6 rounded-lg transition"
                 >
                   Send
                 </button>
-              </div>
+              </form>
             </div>
           )}
 
