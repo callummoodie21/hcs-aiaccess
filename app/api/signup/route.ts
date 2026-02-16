@@ -6,6 +6,11 @@ export async function POST(request: Request) {
   try {
     const signupData = await request.json();
 
+    const fs = require("fs");
+    let signupdata = fs.readFileSync("app/signup.json","utf-8");
+    let data = JSON.parse(signupdata);
+    data.push(signupData);
+
 
     const filePath = path.join(process.cwd(), 'app', 'signup.json');
     
@@ -15,7 +20,7 @@ export async function POST(request: Request) {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    fs.writeFileSync(filePath, JSON.stringify(signupData, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 
     return NextResponse.json({ success: true });
   } catch (error) {
