@@ -27,7 +27,10 @@ export async function POST(req: Request) {
         }
 
         const file = fs.readFileSync(profilePath, "utf-8");
-        const userProfile = JSON.parse(file);
+        const users = JSON.parse(file);
+
+        const userProfile = users.find((user: any) => user.email.toLowerCase() === email.toLowerCase())
+
 
         if (
             userProfile.email.toLowerCase() === email.toLowerCase() &&
