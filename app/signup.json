@@ -1,7 +1,5 @@
 [
   {
-    "firstName": "John",
-    "surname": "Cena",
     "email": "john@gmail.com",
     "password": "Test123123",
     "confirmPassword": "Test123123",

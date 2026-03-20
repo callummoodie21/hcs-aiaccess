@@ -7,8 +7,6 @@ export default function SignUp() {
   const router = useRouter();
 
   const [form, setForm] = useState({
-    firstName: "",
-    surname: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -38,12 +36,6 @@ export default function SignUp() {
     let error = "";
 
     switch (name) {
-      case "firstName":
-      case "surname":
-        if (typeof value === "string" && value.trim().length < 2) {
-          error = "Must be at least 2 characters";
-        }
-        break;
 
       case "email":
         if (typeof value === "string" && !validateEmail(value)) {
@@ -174,33 +166,6 @@ export default function SignUp() {
 
             {/* Left Column */}
             <div className="space-y-5">
-              <div>
-                <input
-                  type="text"
-                  placeholder="First Name"
-                  value={form.firstName}
-                  onChange={(e) => handleChange("firstName", e.target.value)}
-                  onBlur={(e) => handleBlur("firstName", e.target.value)}
-                  className={`w-full border rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 placeholder:text-gray-500 ${
-                    errors.firstName ? "border-red-500 focus:ring-red-600" : "border-gray-300 focus:ring-blue-600"
-                  }`}
-                />
-                {errors.firstName && <p className="!text-red-600 text-xs mt-1">{errors.firstName}</p>}
-              </div>
-
-              <div>
-                <input
-                  type="text"
-                  placeholder="Surname"
-                  value={form.surname}
-                  onChange={(e) => handleChange("surname", e.target.value)}
-                  onBlur={(e) => handleBlur("surname", e.target.value)}
-                  className={`w-full border rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 placeholder:text-gray-500 ${
-                    errors.surname ? "border-red-500 focus:ring-red-600" : "border-gray-300 focus:ring-blue-600"
-                  }`}
-                />
-                {errors.surname && <p className="text-red-500 text-xs mt-1">{errors.surname}</p>}
-              </div>
 
               <div>
                 <input
